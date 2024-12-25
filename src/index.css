@@ -1,6 +1,8 @@
 .container {
   display: flex;
   flex-direction: column;
+  width: 30%;
+  gap: 8px;
 }
 .card {
   width: 300px;
@@ -21,4 +23,8 @@
   margin: 0;
   margin-top: 16px;
   color: gray;
+}
+
+.container input {
+  padding: 8px;
 }
