@@ -3,11 +3,13 @@ interface TodoInputProps {
   placeholder: string;
   onChange: (e: string) => void;
   value: string;
+  required?: boolean;
 }
 
-export default function TodoInput({ name, placeholder, onChange, value }: TodoInputProps) {
+export default function TodoInput({ name, placeholder, onChange, value, required = true }: TodoInputProps) {
   return (
     <input
+      required={required}
       type="text"
       value={value}
       name={name}
