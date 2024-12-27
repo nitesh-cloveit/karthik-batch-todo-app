@@ -29,11 +29,15 @@
 }
 
 .card {
+  display: flex;
+  flex-direction: row;
   text-align: left;
   padding: 8px 16px;
   margin: 8px;
   box-shadow: 0px 2px 5px hsla(0, 2%, 25%, 0.63);
   border-radius: 4px;
+  justify-content: space-between;
+  align-items: flex-start;
 }
 
 .card .card-title {
@@ -72,4 +76,13 @@
 .error {
   color: red;
   margin: 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+
+  button {
+    margin: 0;
+  }
 }
