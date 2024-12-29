@@ -16,7 +16,7 @@ function App() {
 
   const addTodo = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isTitleSame()) {
+    if (isTitleSame(title)) {
       setError("Title already exists");
       return;
     }
@@ -32,32 +32,48 @@ function App() {
     // }
   };
 
-  const isTitleSame = () => {
+  const isTitleSame = (title: string) => {
     return todos?.some((todo) => todo.title === title);
   };
 
   // fetch data from local storage
   useEffect(() => {
     const todos = JSON.parse(localStorage.getItem("todos") || "[]");
-    console.log("local", todos);
     setTodos(todos);
-    console.log("first render");
-  }, []);
+  }, []); // [] means it will run only once
 
   /* store data in local storage */
   useEffect(() => {
-    console.log("from state", todos);
     if (todos !== null) {
       localStorage.setItem("todos", JSON.stringify(todos));
     }
-    console.log("second render");
-  }, [todos]);
+  }, [todos]); // it will run whenever todos changes
 
   // deletes item from the todos array
   const handleDelete = (index: number) => {
     if (todos) {
       const newTodos = [...todos];
       newTodos.splice(index, 1);
+      setTodos(newTodos);
+    }
+  };
+
+  const handleEdit = (index: number, title: string, description?: string) => {
+    if (isTitleSame(title)) {
+      setError("Title already exists");
+      return;
+    }
+    if (todos) {
+      const newTodos = [...todos];
+      newTodos?.map((todo, i) => {
+        if (i === index) {
+          todo.title = title;
+          if (description) {
+            todo.description = description;
+          }
+        }
+      });
+      console.log(newTodos);
       setTodos(newTodos);
     }
   };
@@ -94,6 +110,10 @@ function App() {
               title={todo.title}
               description={todo.description}
               onDelete={() => handleDelete(index)}
+              onEdit={(updatedTitle, updatedDescription) =>
+                handleEdit(index, updatedTitle, updatedDescription)
+              }
+              // isEditing={isEditing}
             />
           ))}
         </div>
