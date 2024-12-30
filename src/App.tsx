@@ -14,33 +14,33 @@ function App() {
   const [todos, setTodos] = useState<TodoItem[] | null>(null);
   const [error, setError] = useState("");
 
-  const addTodo = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (isTitleSame(title)) {
-      setError("Title already exists");
-      return;
-    }
-    if (todos?.length) {
-      // todos is null initially
-      setTodos([...todos, { title, description }]);
-    } else {
-      setTodos([{ title, description }]);
-    }
-    setTitle("");
-    setDescription("");
-    setError("");
-    // }
-  };
+  // const addTodo = (e: React.FormEvent<HTMLFormElement>) => {
+  //   e.preventDefault();
+  //   if (isTitleSame(title)) {
+  //     setError("Title already exists");
+  //     return;
+  //   }
+  //   if (todos?.length) {
+  //     // todos is null initially
+  //     setTodos([...todos, { title, description }]);
+  //   } else {
+  //     setTodos([{ title, description }]);
+  //   }
+  //   setTitle("");
+  //   setDescription("");
+  //   setError("");
+  //   // }
+  // };
 
   const isTitleSame = (title: string) => {
     return todos?.some((todo) => todo.title === title);
   };
 
   // fetch data from local storage
-  useEffect(() => {
-    const todos = JSON.parse(localStorage.getItem("todos") || "[]");
-    setTodos(todos);
-  }, []); // [] means it will run only once
+  // useEffect(() => {
+  //   const todos = JSON.parse(localStorage.getItem("todos") || "[]");
+  //   setTodos(todos);
+  // }, []); // [] means it will run only once
 
   /* store data in local storage */
   useEffect(() => {
@@ -78,11 +78,50 @@ function App() {
     }
   };
 
+  const createTodo = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/todos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: title,
+          description: description,
+          user_id: 1
+        })
+      });
+      console.log(response);
+      const data = await response.json();
+      console.log(data);
+      
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const fetchTodos = async () => {
+    try {
+      // http://localhost:3000/todos
+      const response = await fetch("https://jsonplaceholder.typicode.com/todos");
+      const data = await response.json();
+      console.log(data);
+      setTodos(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchTodos();
+  }, []);
+
   return (
     <div className="app">
       <Header />
       <div className="container">
-        <form onSubmit={addTodo}>
+        <form onSubmit={createTodo}>
           <div className="input-container">
             <TodoInput
               value={title}
