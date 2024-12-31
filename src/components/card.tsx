@@ -3,6 +3,7 @@ import { useState } from "react";
 interface CardProps {
   title: string;
   description?: string;
+  status: boolean;
   onDelete: () => void;
   onEdit: (updatedTitle: string, updatedDescription?: string) => void;
 }
@@ -31,6 +32,7 @@ export default function Card(props: CardProps) {
         </div>
       ) : (
         <div>
+            <input type="checkbox" defaultChecked={props.status} />
           <div>
             <h3 className="card-title">{props.title}</h3>
             <p className="card-desc">{props.description}</p>

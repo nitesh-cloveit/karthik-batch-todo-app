@@ -4,8 +4,11 @@ import Card from "./components/card";
 import TodoInput from "./components/todoInput";
 
 interface TodoItem {
+  id: number;
   title: string;
   description: string;
+  status: boolean;
+  user_id?: number;
 }
 
 function App() {
@@ -14,71 +17,21 @@ function App() {
   const [todos, setTodos] = useState<TodoItem[] | null>(null);
   const [error, setError] = useState("");
 
-  // const addTodo = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
-  //   if (isTitleSame(title)) {
-  //     setError("Title already exists");
-  //     return;
-  //   }
-  //   if (todos?.length) {
-  //     // todos is null initially
-  //     setTodos([...todos, { title, description }]);
-  //   } else {
-  //     setTodos([{ title, description }]);
-  //   }
-  //   setTitle("");
-  //   setDescription("");
-  //   setError("");
-  //   // }
-  // };
-
-  const isTitleSame = (title: string) => {
-    return todos?.some((todo) => todo.title === title);
-  };
-
-  // fetch data from local storage
-  // useEffect(() => {
-  //   const todos = JSON.parse(localStorage.getItem("todos") || "[]");
-  //   setTodos(todos);
-  // }, []); // [] means it will run only once
-
-  /* store data in local storage */
-  useEffect(() => {
-    if (todos !== null) {
-      localStorage.setItem("todos", JSON.stringify(todos));
-    }
-  }, [todos]); // it will run whenever todos changes
-
-  // deletes item from the todos array
-  const handleDelete = (index: number) => {
-    if (todos) {
-      const newTodos = [...todos];
-      newTodos.splice(index, 1);
-      setTodos(newTodos);
+  // fetch todos from the server
+  const handleFetchTodos = async () => {
+    try {
+      // http://localhost:3000/todos
+      const response = await fetch("https://jsonplaceholder.typicode.com/todos/");
+      const data = await response.json();
+      console.log(data);
+      setTodos(data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const handleEdit = (index: number, title: string, description?: string) => {
-    if (isTitleSame(title)) {
-      setError("Title already exists");
-      return;
-    }
-    if (todos) {
-      const newTodos = [...todos];
-      newTodos?.map((todo, i) => {
-        if (i === index) {
-          todo.title = title;
-          if (description) {
-            todo.description = description;
-          }
-        }
-      });
-      console.log(newTodos);
-      setTodos(newTodos);
-    }
-  };
-
-  const createTodo = async () => {
+  // create a new todo item
+  const handleCreateTodo = async () => {
     try {
       const response = await fetch("http://localhost:3000/todos", {
         method: "POST",
@@ -101,27 +54,51 @@ function App() {
     }
   };
 
-  const fetchTodos = async () => {
+  // deletes item from the todos array
+  const handleDelete = (id: number) => {
     try {
-      // http://localhost:3000/todos
-      const response = await fetch("https://jsonplaceholder.typicode.com/todos");
-      const data = await response.json();
-      console.log(data);
-      setTodos(data);
-    } catch (error) {
-      console.log(error);
+      fetch(`http://localhost:3000/todos/${id}`, {
+        method: "DELETE",
+        // headers: {
+        //   "Authorization": `Bearer ${token}`
+        // }
+      });
+    } catch(err) {
+      console.log(err);
     }
   };
 
+  // update todo item
+  // const handleEdit = (index: number, title: string, description?: string) => {
+  //   if (isTitleSame(title)) {
+  //     setError("Title already exists");
+  //     return;
+  //   }
+  //   if (todos) {
+  //     const newTodos = [...todos];
+  //     newTodos?.map((todo, i) => {
+  //       if (i === index) {
+  //         todo.title = title;
+  //         if (description) {
+  //           todo.description = description;
+  //         }
+  //       }
+  //     });
+  //     console.log(newTodos);
+  //     setTodos(newTodos);
+  //   }
+  // };
+
+  // fetch todos on page load
   useEffect(() => {
-    fetchTodos();
+    handleFetchTodos();
   }, []);
 
   return (
     <div className="app">
       <Header />
       <div className="container">
-        <form onSubmit={createTodo}>
+        <form onSubmit={handleCreateTodo}>
           <div className="input-container">
             <TodoInput
               value={title}
@@ -143,15 +120,14 @@ function App() {
 
         <div>
           <h1>Todo List</h1>
-          {todos?.map((todo, index) => (
+          {todos?.map((todo) => (
             <Card
-              key={index}
+              key={todo.id}
               title={todo.title}
               description={todo.description}
-              onDelete={() => handleDelete(index)}
-              onEdit={(updatedTitle, updatedDescription) =>
-                handleEdit(index, updatedTitle, updatedDescription)
-              }
+              status={todo.status}
+              onDelete={() => handleDelete(todo.id)}
+              onEdit={() => {}}
               // isEditing={isEditing}
             />
           ))}
