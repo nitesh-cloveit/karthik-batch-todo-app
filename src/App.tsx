@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Header from "./components/header";
 import Card from "./components/card";
 import TodoInput from "./components/todoInput";
+import { BASE_URL, TOKEN } from "./constants";
 
 interface TodoItem {
   id: number;
@@ -14,14 +15,17 @@ interface TodoItem {
 function App() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [todos, setTodos] = useState<TodoItem[] | null>(null);
+  const [todos, setTodos] = useState<TodoItem[]>([]);
   const [error, setError] = useState("");
 
   // fetch todos from the server
   const handleFetchTodos = async () => {
     try {
-      // http://localhost:3000/todos
-      const response = await fetch("https://jsonplaceholder.typicode.com/todos/");
+      const response = await fetch(`${BASE_URL}/todos`, {
+        headers: {
+          "Authorization": `Bearer ${TOKEN}`
+        }
+      });
       const data = await response.json();
       console.log(data);
       setTodos(data);
@@ -31,63 +35,31 @@ function App() {
   };
 
   // create a new todo item
-  const handleCreateTodo = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleCreateTodo = async (e: any) => {
+    e.preventDefault();
     try {
-      const response = await fetch("http://localhost:3000/todos", {
+      const response = await fetch(`${BASE_URL}/todos`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${TOKEN}`
         },
         body: JSON.stringify({
           title: title,
           description: description,
-          user_id: 1
         })
       });
-      console.log(response);
       const data = await response.json();
-      console.log(data);
-      
-    } catch (error) {
+      setTitle("");
+      setDescription("");
+      setTodos([...todos, data]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
       console.log(error);
+      setError(error?.message || "Unknown error");
     }
   };
-
-  // deletes item from the todos array
-  const handleDelete = (id: number) => {
-    try {
-      fetch(`http://localhost:3000/todos/${id}`, {
-        method: "DELETE",
-        // headers: {
-        //   "Authorization": `Bearer ${token}`
-        // }
-      });
-    } catch(err) {
-      console.log(err);
-    }
-  };
-
-  // update todo item
-  // const handleEdit = (index: number, title: string, description?: string) => {
-  //   if (isTitleSame(title)) {
-  //     setError("Title already exists");
-  //     return;
-  //   }
-  //   if (todos) {
-  //     const newTodos = [...todos];
-  //     newTodos?.map((todo, i) => {
-  //       if (i === index) {
-  //         todo.title = title;
-  //         if (description) {
-  //           todo.description = description;
-  //         }
-  //       }
-  //     });
-  //     console.log(newTodos);
-  //     setTodos(newTodos);
-  //   }
-  // };
 
   // fetch todos on page load
   useEffect(() => {
@@ -98,7 +70,7 @@ function App() {
     <div className="app">
       <Header />
       <div className="container">
-        <form onSubmit={handleCreateTodo}>
+        <form action="post" onSubmit={handleCreateTodo}>
           <div className="input-container">
             <TodoInput
               value={title}
@@ -123,12 +95,10 @@ function App() {
           {todos?.map((todo) => (
             <Card
               key={todo.id}
+              id={todo.id}
               title={todo.title}
               description={todo.description}
               status={todo.status}
-              onDelete={() => handleDelete(todo.id)}
-              onEdit={() => {}}
-              // isEditing={isEditing}
             />
           ))}
         </div>
