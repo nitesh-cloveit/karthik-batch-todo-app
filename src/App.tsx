@@ -8,7 +8,7 @@ interface TodoItem {
   id: number;
   title: string;
   description: string;
-  status: boolean;
+  isCompleted: boolean;
   user_id?: number;
 }
 
@@ -18,15 +18,25 @@ function App() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const [error, setError] = useState("");
 
+  const handleSorting = () => {
+    const sortedTodos = [...todos];
+    sortedTodos.sort((a, b) => {
+      console.log(a.isCompleted, b.isCompleted);
+      return a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1;
+    });
+    setTodos(sortedTodos);
+    console.log(todos);
+  };
+
   // fetch todos from the server
   const handleFetchTodos = async () => {
     try {
       const response = await fetch(`${BASE_URL}/todos`, {
         headers: {
-          "Authorization": `Bearer ${TOKEN}`
-        }
+          Authorization: `Bearer ${TOKEN}`,
+        },
       });
-      const data = await response.json();
+      const data: TodoItem[] = await response.json();
       console.log(data);
       setTodos(data);
     } catch (error) {
@@ -43,18 +53,18 @@ function App() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${TOKEN}`
+          Authorization: `Bearer ${TOKEN}`,
         },
         body: JSON.stringify({
           title: title,
           description: description,
-        })
+        }),
       });
       const data = await response.json();
       setTitle("");
       setDescription("");
       setTodos([...todos, data]);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.log(error);
       setError(error?.message || "Unknown error");
@@ -64,6 +74,7 @@ function App() {
   // fetch todos on page load
   useEffect(() => {
     handleFetchTodos();
+    handleSorting();
   }, []);
 
   return (
@@ -92,15 +103,32 @@ function App() {
 
         <div>
           <h1>Todo List</h1>
-          {todos?.map((todo) => (
-            <Card
-              key={todo.id}
-              id={todo.id}
-              title={todo.title}
-              description={todo.description}
-              status={todo.status}
-            />
-          ))}
+          {todos
+            ?.filter((todo) => !todo.isCompleted)
+            .map((todo) => (
+              <Card
+                key={todo.id}
+                id={todo.id}
+                title={todo.title}
+                description={todo.description}
+                isCompleted={todo.isCompleted}
+              />
+            ))}
+        </div>
+
+        <div>
+          <h1>Completed Todo List</h1>
+          {todos
+            ?.filter((todo) => todo.isCompleted)
+            .map((todo) => (
+              <Card
+                key={todo.id}
+                id={todo.id}
+                title={todo.title}
+                description={todo.description}
+                isCompleted={todo.isCompleted}
+              />
+            ))}
         </div>
       </div>
     </div>

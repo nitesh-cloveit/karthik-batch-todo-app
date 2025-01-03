@@ -5,13 +5,14 @@ interface CardProps {
   id: number;
   title: string;
   description?: string;
-  status: boolean;
+  isCompleted: boolean;
 }
 
 export default function Card(props: CardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(props.title);
   const [newDescription, setDescription] = useState(props.description);
+  const [isCompleted, setIsCompleted] = useState(props?.isCompleted || false);
 
   // update todo item
   const handleEdit = async () => {
@@ -48,12 +49,44 @@ export default function Card(props: CardProps) {
     }
   };
 
+  // update todo item
+  const handleTaskStatusUpdate = async (isCompleted: boolean) => {
+    setIsCompleted(isCompleted);
+    try {
+      await fetch(`${BASE_URL}/todos/${props.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({
+          isCompleted,
+        }),
+      });
+      window.location.reload();
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <div className="card">
       {isEditing ? (
-        <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "8px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            gap: "8px",
+          }}
+        >
           <div
-            style={{ display: "flex", flexDirection: "column", width: "100%", gap: "4px" }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              width: "100%",
+              gap: "4px",
+            }}
           >
             <input
               value={newTitle}
@@ -65,24 +98,59 @@ export default function Card(props: CardProps) {
             />
           </div>
           <div className="card-actions">
-            <button className="save" onClick={handleEdit}>Save</button>
-            <button className="cancel" onClick={() => setIsEditing(false)}>Cancel</button>
+            <button className="save" onClick={handleEdit}>
+              Save
+            </button>
+            <button className="cancel" onClick={() => setIsEditing(false)}>
+              Cancel
+            </button>
           </div>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "8px" }}>
-          <div style={{ display: "flex", flexDirection: "row", width: "100%", gap: "8px" }}>
-            <input style={{ alignSelf: "self-start" }} type="checkbox" defaultChecked={props.status || false} />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            gap: "8px",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              width: "100%",
+              gap: "8px",
+            }}
+          >
+            <input
+              style={{ alignSelf: "self-start" }}
+              type="checkbox"
+              checked={isCompleted}
+              onClick={(e) => handleTaskStatusUpdate(e.currentTarget.checked)}
+            />
 
-            <div style={{ display: "flex", flexDirection: "column", width: "100%", gap: "8px" }}>
-            <h3 className="card-title">{newTitle}</h3>
-            <p className="card-desc">{newDescription}</p>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                width: "100%",
+                gap: "8px",
+              }}
+              className={`${isCompleted ? "task-complete" : ""}`}
+            >
+              <h3 className="card-title">{newTitle}</h3>
+              <p className="card-desc">{newDescription}</p>
             </div>
           </div>
-          <div className="card-actions">
-            <button onClick={() => setIsEditing(true)}>Edit</button>
-            <button className="delete" onClick={handleDelete}>Delete</button>
-          </div>
+          {!isCompleted && (
+            <div className="card-actions">
+              <button onClick={() => setIsEditing(true)}>Edit</button>
+              <button className="delete" onClick={handleDelete}>
+                Delete
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>
