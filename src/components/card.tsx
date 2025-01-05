@@ -139,6 +139,7 @@ export default function Card(props: CardProps) {
               }}
               className={`${isCompleted ? "task-complete" : ""}`}
             >
+              <h3>{props.id}</h3>
               <h3 className="card-title">{newTitle}</h3>
               <p className="card-desc">{newDescription}</p>
             </div>

@@ -1,0 +1,61 @@
+import { useState } from "react";
+import TodoInput from "../components/todoInput";
+import { BASE_URL, TOKEN } from "../constants";
+import { useNavigate } from "react-router";
+
+export default function AddTodo() {
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  // create a new todo item
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleCreateTodo = async (e: any) => {
+    e.preventDefault();
+    try {
+      await fetch(`${BASE_URL}/todos`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${TOKEN}`,
+        },
+        body: JSON.stringify({
+          title: title,
+          description: description,
+        }),
+      });
+      setTitle("");
+      setDescription("");
+      navigate("/todo");
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (error: any) {
+      console.log(error);
+      setError(error?.message || "Unknown error");
+    }
+  };
+  return (
+    <div>
+      <h1>ADD TODO</h1>
+      <form action="post" onSubmit={handleCreateTodo}>
+        <div className="input-container">
+          <TodoInput
+            value={title}
+            name="Title"
+            placeholder="Enter Title"
+            onChange={setTitle}
+          />
+          <TodoInput
+            required={false}
+            value={description}
+            name="Description"
+            placeholder="Enter Description"
+            onChange={setDescription}
+          />
+        </div>
+        {error && <p className="error">Title already exists</p>}
+        <button type="submit">Add</button>
+      </form>
+    </div>
+  );
+}
