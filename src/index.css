@@ -108,3 +108,11 @@
   text-decoration: line-through;
   color: gray;
 }
+
+.light-header {
+  background-color: #f0f0f0;
+}
+
+.dark-header {
+  background-color: #1a1818;
+}

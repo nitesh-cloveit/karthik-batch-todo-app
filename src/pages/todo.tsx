@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import Card from "../components/card";
 import Header from "../components/header";
 import { BASE_URL, TOKEN } from "../constants";
 import { useNavigate } from "react-router";
+import { ThemeContext } from "../context/themeContext";
 
 interface TodoItem {
   id: number;
@@ -14,7 +15,10 @@ interface TodoItem {
 
 export default function Todo() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const {theme} = useContext(ThemeContext)
+
+  console.log({theme})
 
   const handleSorting = () => {
     const sortedTodos = [...todos];
@@ -48,17 +52,18 @@ export default function Todo() {
     handleSorting();
   }, []);
 
+  const completedTodos = todos?.filter((todo) => todo.isCompleted) || [];
+
   return (
     <div className="app">
       <Header />
       <button onClick={() => navigate("add")}>Add Task</button>
       <div className="container">
-
         <div>
           <h1>Todo List</h1>
           {todos
             ?.filter((todo) => !todo.isCompleted)
-            .sort((a,b) => a.id - b.id)
+            .sort((a, b) => a.id - b.id)
             .map((todo) => (
               <Card
                 key={todo.id}
@@ -70,11 +75,10 @@ export default function Todo() {
             ))}
         </div>
 
-        <div>
-          <h1>Completed Todo List</h1>
-          {todos
-            ?.filter((todo) => todo.isCompleted)
-            .map((todo) => (
+        {completedTodos.length > 0 && (
+          <div>
+            <h1>Completed Todo List</h1>
+            {completedTodos.map((todo) => (
               <Card
                 key={todo.id}
                 id={todo.id}
@@ -83,7 +87,8 @@ export default function Todo() {
                 isCompleted={todo.isCompleted}
               />
             ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
