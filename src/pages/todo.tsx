@@ -1,9 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import Card from "../components/card";
 import Header from "../components/header";
-import { BASE_URL, TOKEN } from "../constants";
+import { BASE_URL } from "../constants";
 import { useNavigate } from "react-router";
-import { ThemeContext } from "../context/themeContext";
+import { AuthContext } from "../context/authContext";
 
 interface TodoItem {
   id: number;
@@ -16,9 +16,7 @@ interface TodoItem {
 export default function Todo() {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const navigate = useNavigate();
-  const {theme} = useContext(ThemeContext)
-
-  console.log({theme})
+  const { token } = useContext(AuthContext);
 
   const handleSorting = () => {
     const sortedTodos = [...todos];
@@ -35,7 +33,7 @@ export default function Todo() {
     try {
       const response = await fetch(`${BASE_URL}/todos`, {
         headers: {
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       const data: TodoItem[] = await response.json();

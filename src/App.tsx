@@ -3,9 +3,12 @@ import Todo from "./pages/todo";
 import Login from "./pages/login";
 import Register from "./pages/register";
 import AddTodo from "./pages/addTodo";
+import { useContext } from "react";
+import { AuthContext } from "./context/authContext";
 
 const ProtectedRoutes = () => {
-  const token = "";
+  const { token } = useContext(AuthContext);
+  console.log({token})
   return token ? <Outlet /> : <Navigate to="/login" />;
 };
 
