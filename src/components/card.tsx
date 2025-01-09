@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { BASE_URL, TOKEN } from "../constants";
+import { useContext, useState } from "react";
+import { BASE_URL } from "../constants";
+import { AuthContext } from "../context/authContext";
 
 interface CardProps {
   id: number;
@@ -13,7 +14,7 @@ export default function Card(props: CardProps) {
   const [newTitle, setNewTitle] = useState(props.title);
   const [newDescription, setDescription] = useState(props.description);
   const [isCompleted, setIsCompleted] = useState(props?.isCompleted || false);
-
+  const { token } = useContext(AuthContext)
   // update todo item
   const handleEdit = async () => {
     try {
@@ -21,7 +22,7 @@ export default function Card(props: CardProps) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           title: newTitle,
@@ -40,7 +41,7 @@ export default function Card(props: CardProps) {
       fetch(`${BASE_URL}/todos/${props.id}`, {
         method: "DELETE",
         headers: {
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
       });
       window.location.reload();
@@ -57,7 +58,7 @@ export default function Card(props: CardProps) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           isCompleted,

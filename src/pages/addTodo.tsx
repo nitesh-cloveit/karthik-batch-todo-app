@@ -1,13 +1,15 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import TodoInput from "../components/todoInput";
-import { BASE_URL, TOKEN } from "../constants";
+import { BASE_URL } from "../constants";
 import { useNavigate } from "react-router";
+import { AuthContext } from "../context/authContext";
 
 export default function AddTodo() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { token } = useContext(AuthContext)
 
   // create a new todo item
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,7 +20,7 @@ export default function AddTodo() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${TOKEN}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           title: title,
@@ -36,7 +38,7 @@ export default function AddTodo() {
   };
   return (
     <div>
-      <h1>ADD TODO</h1>
+      <h1 className="text-lg">ADD TODO</h1>
       <form action="post" onSubmit={handleCreateTodo}>
         <div className="input-container">
           <TodoInput
