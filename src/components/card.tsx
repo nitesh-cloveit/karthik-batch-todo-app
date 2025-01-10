@@ -1,20 +1,25 @@
 import { useContext, useState } from "react";
 import { BASE_URL } from "../constants";
 import { AuthContext } from "../context/authContext";
+import withToken from "../hoc/withToken";
+import withHover from "../hoc/withHover";
 
 interface CardProps {
   id: number;
   title: string;
   description?: string;
   isCompleted: boolean;
+  tokenFromHOC?: string;
+  hovered: boolean;
 }
 
-export default function Card(props: CardProps) {
+function Card(props: CardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [newTitle, setNewTitle] = useState(props.title);
   const [newDescription, setDescription] = useState(props.description);
   const [isCompleted, setIsCompleted] = useState(props?.isCompleted || false);
-  const { token } = useContext(AuthContext)
+  const { token } = useContext(AuthContext);
+
   // update todo item
   const handleEdit = async () => {
     try {
@@ -58,7 +63,7 @@ export default function Card(props: CardProps) {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${props?.tokenFromHOC}`,
         },
         body: JSON.stringify({
           isCompleted,
@@ -71,7 +76,9 @@ export default function Card(props: CardProps) {
   };
 
   return (
-    <div className="card">
+    <div className="card" style={{
+      backgroundColor: `${props.hovered ? "lightgray": "white"}`
+    }}>
       {isEditing ? (
         <div
           style={{
@@ -157,3 +164,7 @@ export default function Card(props: CardProps) {
     </div>
   );
 }
+
+const cardWithToken = withHover(withToken(Card));
+
+export default cardWithToken;

@@ -1,9 +1,9 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import Card from "../components/card";
 import Header from "../components/header";
 import { BASE_URL } from "../constants";
 import { useNavigate } from "react-router";
-import { AuthContext } from "../context/authContext";
+import { withFetch } from "../hoc/withFetch";
 
 interface TodoItem {
   id: number;
@@ -13,41 +13,26 @@ interface TodoItem {
   user_id?: number;
 }
 
-export default function Todo() {
+function Todo(props: any) {
   const [todos, setTodos] = useState<TodoItem[]>([]);
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext);
-
-  const handleSorting = () => {
-    const sortedTodos = [...todos];
-    sortedTodos.sort((a, b) => {
-      console.log(a.isCompleted, b.isCompleted);
-      return a.isCompleted === b.isCompleted ? 0 : a.isCompleted ? 1 : -1;
-    });
-    setTodos(sortedTodos);
-    console.log(todos);
-  };
 
   // fetch todos from the server
   const handleFetchTodos = async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/todos`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      const data: TodoItem[] = await response.json();
-      console.log(data);
-      setTodos(data);
-    } catch (error) {
-      console.log(error);
-    }
+    console.log(props.data)
+    setTodos(props.data);
   };
 
   // fetch todos on page load
   useEffect(() => {
-    handleFetchTodos();
-    handleSorting();
+    async function fetchData() {
+      const data = await props.handleTodoFetch();
+      console.log(data);
+      setTodos(data);
+    }
+
+    fetchData();
+   
   }, []);
 
   const completedTodos = todos?.filter((todo) => todo.isCompleted) || [];
@@ -91,3 +76,7 @@ export default function Todo() {
     </div>
   );
 }
+
+const TodoWithFetch = withFetch(Todo, `${BASE_URL}/todos`);
+
+export {TodoWithFetch};
