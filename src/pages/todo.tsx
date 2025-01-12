@@ -4,6 +4,7 @@ import Header from "../components/header";
 import { BASE_URL } from "../constants";
 import { useNavigate } from "react-router";
 import { withFetch } from "../hoc/withFetch";
+import { useAppDispatch, useAppSelector } from "../redux/hooks";
 
 interface TodoItem {
   id: number;
@@ -14,21 +15,24 @@ interface TodoItem {
 }
 
 function Todo(props: any) {
-  const [todos, setTodos] = useState<TodoItem[]>([]);
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const { todos } = useAppSelector((state) => state.todo)
 
   // fetch todos from the server
-  const handleFetchTodos = async () => {
-    console.log(props.data)
-    setTodos(props.data);
-  };
+  // const handleFetchTodos = async () => {
+  //   console.log(props.data)
+  //   setTodos(props.data);
+  // };
 
   // fetch todos on page load
   useEffect(() => {
     async function fetchData() {
       const data = await props.handleTodoFetch();
-      console.log(data);
-      setTodos(data);
+      dispatch({
+        type: "todos/setTodos",
+        payload: data,
+      })
     }
 
     fetchData();
@@ -41,6 +45,9 @@ function Todo(props: any) {
     <div className="app">
       <Header />
       <button onClick={() => navigate("add")}>Add Task</button>
+      <button onClick={() => {
+        dispatch({ type: "todos/filterTodos" })
+      }}>Filter</button>
       <div className="container">
         <div>
           <h1>Todo List</h1>
