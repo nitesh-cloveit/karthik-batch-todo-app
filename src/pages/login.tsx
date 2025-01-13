@@ -5,8 +5,8 @@ import { AuthContext } from "../context/authContext";
 import { BASE_URL } from "../constants";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("admin@gmail.com");
+  const [password, setPassword] = useState("admin123");
 
   const { handleLogin } = useContext(AuthContext);
   const login = async () => {
@@ -14,6 +14,9 @@ export default function Login() {
       // API call to /auth/login
       const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           username,
           password,

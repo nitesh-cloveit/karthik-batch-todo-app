@@ -1,4 +1,7 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+import { BASE_URL } from "../../constants";
+import axios from "axios";
+import { axiosHttp } from "../../http";
 
 interface TodoItem {
   id: number;
@@ -9,30 +12,68 @@ interface TodoItem {
 }
 
 interface TodoState {
+  isLoading: boolean;
   todos: TodoItem[];
   error: string | null;
 }
 
 const initialState: TodoState = {
+  isLoading: false,
   todos: [],
   error: null
 }
 
+export const fetchTodosThunk = createAsyncThunk(
+  "todos/get",
+  async () => {
+  try {
+    const response = await axiosHttp('/todos');
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+});
+
+export const addTodosThunk = createAsyncThunk(
+  "todos/add",
+  async (body: any) => {
+  try {
+    const response = await axiosHttp.post('/todos', body);
+    return response.data;
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+});
+
 export const todoSlice = createSlice({
   name: 'todos',
   initialState,
-  reducers: {
-    setTodos: (state, action) => {
-      state.todos = action.payload
-    },
-    filterTodos: (state) => {
-      state.todos = state.todos.filter(todo => todo.isCompleted === false)
-    }
-    // addTodo: (state, action) => {}
+  reducers: {},
+  extraReducers: (builder) => {
+    builder
+    .addCase(fetchTodosThunk.pending, (state) => {
+      state.isLoading = true;
+    })
+    .addCase(fetchTodosThunk.fulfilled, (state, action) => {
+      console.log(action.payload)
+      state.todos = action.payload;
+      state.isLoading = false;
+    })
+    .addCase(fetchTodosThunk.rejected, (state, action: any) => {
+      state.todos = [];
+      state.isLoading = false;
+      state.error = action.payload;
+    })
+    .addCase(addTodosThunk.fulfilled, (state, action) => {
+      state.todos = [...state.todos, action.payload];
+      state.isLoading = false;
+    })
   }
 })
 
-export const { setTodos, filterTodos } = todoSlice.actions; // Called through dispatch
+// export const { setTodos, filterTodos, fetchTodosError } = todoSlice.actions; // Called through dispatch
 
 export default todoSlice.reducer;
 

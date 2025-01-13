@@ -1,32 +1,22 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import TodoInput from "../components/todoInput";
-import { BASE_URL } from "../constants";
 import { useNavigate } from "react-router";
-import { AuthContext } from "../context/authContext";
+import { useAppDispatch } from "../redux/hooks";
+import { addTodosThunk } from "../redux/slices/todoSlice";
 
 export default function AddTodo() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { token } = useContext(AuthContext)
+  const dispatch = useAppDispatch();
 
   // create a new todo item
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCreateTodo = async (e: any) => {
     e.preventDefault();
     try {
-      await fetch(`${BASE_URL}/todos`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: title,
-          description: description,
-        }),
-      });
+      dispatch(addTodosThunk({title, description}))
       setTitle("");
       setDescription("");
       navigate("/todo");

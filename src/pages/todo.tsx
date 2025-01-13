@@ -5,6 +5,7 @@ import { BASE_URL } from "../constants";
 import { useNavigate } from "react-router";
 import { withFetch } from "../hoc/withFetch";
 import { useAppDispatch, useAppSelector } from "../redux/hooks";
+import { fetchTodosThunk } from "../redux/slices/todoSlice";
 
 interface TodoItem {
   id: number;
@@ -14,30 +15,19 @@ interface TodoItem {
   user_id?: number;
 }
 
-function Todo(props: any) {
+function Todo() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { todos } = useAppSelector((state) => state.todo)
-
-  // fetch todos from the server
-  // const handleFetchTodos = async () => {
-  //   console.log(props.data)
-  //   setTodos(props.data);
-  // };
+  const { todos, isLoading, error } = useAppSelector((state) => state.todo)
 
   // fetch todos on page load
   useEffect(() => {
-    async function fetchData() {
-      const data = await props.handleTodoFetch();
-      dispatch({
-        type: "todos/setTodos",
-        payload: data,
-      })
-    }
+   dispatch(fetchTodosThunk())
+  }, [dispatch]);
 
-    fetchData();
-   
-  }, []);
+  if (isLoading) return <p>Loading...</p>;
+
+  console.log({error})
 
   const completedTodos = todos?.filter((todo) => todo.isCompleted) || [];
 
